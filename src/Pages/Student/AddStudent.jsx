@@ -11,7 +11,7 @@ function AddStudent() {
   const { register, handleSubmit } = useForm();
   const [error, setError] = useState("");
   const [documents, setDocuments] = useState([{ name: "", file: null }]);
-
+   
   const handleChange = (index, field, value) => {
     const updatedDocs = [...documents];
     updatedDocs[index][field] = value;
@@ -37,8 +37,9 @@ function AddStudent() {
     const newStudent = await student.addStudentDetails({
       ...data,
       image: imageId,
+      
     });
-
+    console.log(data)
     const studentId = newStudent?.studentId; // we will fix this below
 
     // Upload documents + save
