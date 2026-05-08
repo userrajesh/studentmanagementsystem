@@ -14,51 +14,18 @@ class EditStudent {
     this.storage = new Storage(this.client);
   }
 
-  async getAllStudent({
-    limit = 10,
-    offset = 0,
-    search,
-    classFilter,
-    sectionFilter,
-  } = {}) {
+  async getAllStudent() {
     try {
-      const queries = [];
-
-      //  Force number conversion
-      const safeLimit = Number(limit);
-      const safeOffset = Number(offset);
-
-      //  Guard against invalid numbers
-      if (isNaN(safeLimit) || isNaN(safeOffset)) {
-        throw new Error("Limit or Offset is not a valid number");
-      }
-      //  Always required
-      queries.push(Query.limit(Number(limit)));
-      queries.push(Query.offset(Number(offset)));
-
-      // Add only if valid
-      if (search && search.trim() !== "") {
-        queries.push(Query.search("fullName", search.trim()));
-      }
-
-      if (classFilter && classFilter !== "") {
-        queries.push(Query.equal("Class", [classFilter]));
-      }
-
-      if (sectionFilter && sectionFilter !== "") {
-        queries.push(Query.equal("section", [sectionFilter]));
-      }
-       queries.push( Query.orderDesc('$sequence'))
       return await this.tablesDB.listRows({
         databaseId: conf.database_Id,
         tableId: "student",
-        queries,
       });
     } catch (error) {
       console.log("Error in getAllStudent", error);
       return null;
     }
   }
+
   async getSingleStudent(id) {
     try {
       return await this.tablesDB.getRow({

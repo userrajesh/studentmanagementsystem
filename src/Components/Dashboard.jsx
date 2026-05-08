@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import FullDetails from "../Components/Dashboard/FullDetails";
 import AddStudent from "../Pages/Student/AddStudent";
 import ViewStudent from "../Pages/Student/ViewStudent";
+import { Outlet, useNavigate,useLocation} from "react-router-dom";
 export default function Dashboard() {
   const [activePage, setActivePage] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [studentMenuOpen, setStudentMenuOpen] = useState(false);
-
+ const navigate = useNavigate();
+ const location = useLocation();
   const renderPage = () => {
     switch (activePage) {
       case "addStudent":
@@ -31,7 +33,7 @@ export default function Dashboard() {
 
             <nav className="p-4 space-y-2 text-sm">
               <button
-                onClick={() => setActivePage("dashboard")}
+                onClick={() => navigate("/")}
                 className="block w-full text-left p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 Dashboard
@@ -50,14 +52,14 @@ export default function Dashboard() {
                 {studentMenuOpen && (
                   <div className="ml-4 mt-1 space-y-1">
                     <button
-                      onClick={() => setActivePage("addStudent")}
+                      onClick={() => navigate("addStudent")}
                       className="block w-full text-left p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       Student Admission
                     </button>
 
                     <button
-                      onClick={() => setActivePage("viewStudent")}
+                      onClick={() => navigate("viewStudent")}
                       className="block w-full text-left p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       Student List
@@ -89,8 +91,13 @@ export default function Dashboard() {
           {sidebarOpen ? "◀" : "▶"}
         </button>
 
-        {/* Main Content */}
-        <main className="flex-1 p-4">{renderPage()}</main>
+         <main className="flex-1 p-4">
+          {location.pathname === "/dashboard" ? (
+            <FullDetails />
+          ) : (
+            <Outlet />
+          )}
+        </main>
       </div>
     </div>
   );

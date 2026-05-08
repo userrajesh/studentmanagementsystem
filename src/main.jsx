@@ -13,6 +13,8 @@ import {
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
 import authStore from "./store/authStore.js";
+import AddStudent from "./Pages/Student/AddStudent.jsx";
+import ViewStudent from "./Pages/Student/ViewStudent.jsx";
 
 const router = createBrowserRouter([
   {
@@ -35,6 +37,32 @@ const router = createBrowserRouter([
             <Dashboard />
           </AuthLayout>
         ),
+        children: [
+          {
+            path: "addStudent",
+            element: (
+              <AuthLayout authentication={true}>
+                <AddStudent />
+              </AuthLayout>
+            ),
+          },
+          {
+            path: "viewStudent",
+            element: (
+              <AuthLayout authentication={true}>
+                <ViewStudent />
+              </AuthLayout>
+            ),
+          },
+          {
+            path: "preview-student/:studentId",
+            element: (
+              <AuthLayout authentication={true}>
+                <PreviewStudent />
+              </AuthLayout>
+            ),
+          },
+        ],
       },
 
       {
@@ -53,10 +81,6 @@ const router = createBrowserRouter([
             <Register />
           </AuthLayout>
         ),
-      },
-      {
-        path: "/preview-student/:studentId",
-        element: <PreviewStudent />,
       },
     ],
   },
