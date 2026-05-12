@@ -14,17 +14,69 @@ class EditStudent {
     this.storage = new Storage(this.client);
   }
 
-  async getAllStudent() {
+  async getAllStudent({
+    limit = 10,
+    offset = 0,
+    search,
+    classFilter,
+    sectionFilter,
+  } = {}) {
     try {
+      const queries = [];
+
+      const safeLimit = Number(limit);
+      const safeOffset = Number(offset);
+
+      if (isNaN(safeLimit) || isNaN(safeOffset)) {
+        throw new Error("Limit or Offset is not a valid number");
+      }
+
+      queries.push(Query.limit(safeLimit));
+      queries.push(Query.offset(safeOffset));
+
+      if (search && search.trim() !== "") {
+        queries.push(Query.search("fullName", search.trim()));
+      }
+
+      if (classFilter) {
+        queries.push(Query.equal("Class", [classFilter]));
+      }
+
+      if (sectionFilter) {
+        queries.push(Query.equal("section", [sectionFilter]));
+      }
+
       return await this.tablesDB.listRows({
         databaseId: conf.database_Id,
         tableId: "student",
+        queries,
       });
     } catch (error) {
       console.log("Error in getAllStudent", error);
       return null;
     }
   }
+ async getStudentByClass(studentClass, section) {
+  try {
+    // stop if any value is missing
+    if (!studentClass || !section) {
+      throw new Error("Class and Section are required");
+    }
+
+    const queries = [
+      Query.equal("Class", [studentClass]),
+      Query.equal("section", [section]),
+    ];
+
+    return await this.tablesDB.listRows({
+      databaseId: conf.database_Id,
+      tableId: "student",
+      queries,
+    });
+  } catch (error) {
+    console.log("Error in getStudentByClass::", error);
+  }
+}
 
   async getSingleStudent(id) {
     try {

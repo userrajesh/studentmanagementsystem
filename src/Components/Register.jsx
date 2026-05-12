@@ -1,4 +1,4 @@
-import React, { Children, useState } from "react";
+import React, { useState } from "react";
 import userAuth from "../../appwrite/authConfig";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -10,22 +10,37 @@ import { useForm } from "react-hook-form";
 
 function Register() {
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   const navigate = useNavigate();
+
+  const { register, handleSubmit } = useForm();
+
+  // =========================
+  // REGISTER USER
+  // =========================
   const create = async (data) => {
     setError("");
+    setSuccess("");
+
     try {
       const session = await userAuth.createUser(data);
+
       if (session) {
-        const userData = await authservice.getCurrentUser();
-        dispatch(login(userData));
-        navigate("/");
+        setSuccess(
+          "Registration successful! Redirecting to login page..."
+        );
+
+        // Redirect after 3 seconds
+        setTimeout(() => {
+          navigate("/");
+        }, 3000);
       }
     } catch (error) {
-      setError(error.message);
-    } finally {
+      setError(error.message || "Something went wrong");
     }
   };
-  const { register, handleSubmit } = useForm();
+
   return (
     <div className="w-full max-w-2xl bg-white p-8 rounded-lg shadow-md">
       {/* Heading */}
@@ -36,12 +51,26 @@ function Register() {
       <p className="text-gray-600 mt-2">
         Start your website in seconds. Already have an account?
         <Link
-          to={"/"}
+          to={"/login"}
           className="text-blue-600 hover:underline font-medium ml-1"
         >
           Login Here
         </Link>
       </p>
+
+      {/* SUCCESS MESSAGE */}
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mt-4">
+          {success}
+        </div>
+      )}
+
+      {/* ERROR MESSAGE */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-4">
+          {error}
+        </div>
+      )}
 
       {/* Form */}
       <form onSubmit={handleSubmit(create)} className="mt-6">
@@ -54,11 +83,11 @@ function Register() {
               label="Enter Email"
               placeholder="name@company.com"
               {...register("email", {
-                required: true,
+                required: "Email is required",
                 validate: {
                   matchPattern: (value) =>
                     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ||
-                    "Email address must be a valid address",
+                    "Email address must be valid",
                 },
               })}
             />
@@ -71,7 +100,7 @@ function Register() {
               label="Enter Your Name"
               placeholder="e.g Rajesh Mandal"
               {...register("name", {
-                required: true,
+                required: "Name is required",
               })}
             />
           </div>
@@ -82,7 +111,9 @@ function Register() {
               options={["India", "China", "Nepal"]}
               label="Country"
               className="mb-4"
-              {...register("status", { required: true })}
+              {...register("country", {
+                required: true,
+              })}
             />
           </div>
 
@@ -93,7 +124,11 @@ function Register() {
               label="Choose a password"
               placeholder="••••••••"
               {...register("password", {
-                required: true,
+                required: "Password is required",
+                minLength: {
+                  value: 8,
+                  message: "Password must be at least 8 characters",
+                },
               })}
             />
           </div>
@@ -133,11 +168,17 @@ function Register() {
         {/* Terms */}
         <div className="mt-6 space-y-3 mb-4">
           <label className="flex items-start gap-2 text-sm text-gray-600">
-            <input type="checkbox" className="mt-1" />
+            <input type="checkbox" className="mt-1" required />
             <span>
               By signing up, you agree to the{" "}
-              <a className="text-blue-600 hover:underline">Terms of Use</a> and{" "}
-              <a className="text-blue-600 hover:underline">Privacy Policy</a>.
+              <span className="text-blue-600 hover:underline cursor-pointer">
+                Terms of Use
+              </span>{" "}
+              and{" "}
+              <span className="text-blue-600 hover:underline cursor-pointer">
+                Privacy Policy
+              </span>
+              .
             </span>
           </label>
         </div>

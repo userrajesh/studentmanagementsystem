@@ -15,7 +15,9 @@ import { Provider } from "react-redux";
 import authStore from "./store/authStore.js";
 import AddStudent from "./Pages/Student/AddStudent.jsx";
 import ViewStudent from "./Pages/Student/ViewStudent.jsx";
-
+import StudentAttendance from "./Pages/Student/StudentAttendance.jsx";
+import ViewTeacher from "./Pages/Teacher/ViewTeacher.jsx";
+import AddTeacher from "./Pages/Teacher/AddTeacher.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -59,6 +61,38 @@ const router = createBrowserRouter([
             element: (
               <AuthLayout authentication={true}>
                 <PreviewStudent />
+              </AuthLayout>
+            ),
+          },
+          {
+            path: "student-attendance",
+            element: (
+              <AuthLayout authentication={true}>
+                <StudentAttendance />
+              </AuthLayout>
+            ),
+          },
+          {
+            path: "all-teachers",
+            element: (
+              <AuthLayout authentication={true}>
+                <ViewTeacher />
+              </AuthLayout>
+            ),
+          },
+          {
+            path: "add-teacher",
+            element: (
+              <AuthLayout authentication={true}>
+                <AddTeacher />
+              </AuthLayout>
+            ),
+          },
+          {
+            path: "edit-student/:studentId",
+            element: (
+              <AuthLayout authentication={true}>
+                <AddStudent />
               </AuthLayout>
             ),
           },

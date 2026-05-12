@@ -2,14 +2,15 @@ import React, { useState } from "react";
 import FullDetails from "../Components/Dashboard/FullDetails";
 import AddStudent from "../Pages/Student/AddStudent";
 import ViewStudent from "../Pages/Student/ViewStudent";
-import { Outlet, useNavigate,useLocation} from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 export default function Dashboard() {
   const [activePage, setActivePage] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [studentMenuOpen, setStudentMenuOpen] = useState(false);
- const navigate = useNavigate();
- const location = useLocation();
+  const [teacherMenuOpen, setTeacherMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
   const renderPage = () => {
     switch (activePage) {
       case "addStudent":
@@ -65,16 +66,47 @@ export default function Dashboard() {
                       Student List
                     </button>
 
-                    <button className="block w-full text-left p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <button
+                      className="block w-full text-left p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => navigate("student-attendance")}
+                    >
                       Student Attendance
                     </button>
                   </div>
                 )}
               </div>
 
-              <button className="block w-full text-left p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
-                Teachers
-              </button>
+              {/* Teacher Dropdown */}
+              <div>
+                <button
+                  onClick={() => setTeacherMenuOpen(!teacherMenuOpen)}
+                  className="w-full flex justify-between items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Teachers 
+                  <span>{teacherMenuOpen ? "▲" : "▼"}</span>
+                </button>
+
+                {teacherMenuOpen && (
+                  <div className="ml-4 mt-1 space-y-1">
+                    <button
+                      onClick={() => navigate("add-teacher")}
+                      className="block w-full text-left p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Add Teacher
+                    </button>
+
+                    
+
+                    <button
+                      className="block w-full text-left p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => navigate("all-teachers")}
+                    >
+                      
+                  All Teachers
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <button className="block w-full text-left p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
                 Staff Management
@@ -91,12 +123,8 @@ export default function Dashboard() {
           {sidebarOpen ? "◀" : "▶"}
         </button>
 
-         <main className="flex-1 p-4">
-          {location.pathname === "/dashboard" ? (
-            <FullDetails />
-          ) : (
-            <Outlet />
-          )}
+        <main className="flex-1 p-4">
+          {location.pathname === "/dashboard" ? <FullDetails /> : <Outlet />}
         </main>
       </div>
     </div>
