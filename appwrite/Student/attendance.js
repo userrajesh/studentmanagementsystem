@@ -1,12 +1,5 @@
 import conf from "../../conf/conf";
-import {
-  Client,
-  Account,
-  Query,
-  TablesDB,
-  Storage,
-  ID,
-} from "appwrite";
+import { Client, Account, Query, TablesDB, Storage, ID } from "appwrite";
 
 class Attendance {
   client = new Client();
@@ -14,9 +7,7 @@ class Attendance {
   storage;
 
   constructor() {
-    this.client
-      .setProject(conf.project_Id)
-      .setEndpoint(conf.project_Url);
+    this.client.setProject(conf.project_Id).setEndpoint(conf.project_Url);
 
     this.account = new Account(this.client);
     this.tablesDB = new TablesDB(this.client);
@@ -28,7 +19,7 @@ class Attendance {
     date,
     studentClass,
     section,
-    attendance
+    attendance,
   ) {
     try {
       // CHECK IF RECORD ALREADY EXISTS
@@ -40,7 +31,7 @@ class Attendance {
           Query.equal("Date", date),
           Query.equal("schoolClass", studentClass),
           Query.equal("schoolSection", section),
-        ]
+        ],
       );
 
       // IF RECORD EXISTS -> UPDATE
@@ -53,7 +44,7 @@ class Attendance {
           rowId,
           {
             Attendance: attendance,
-          }
+          },
         );
 
         console.log("Attendance Updated");
@@ -71,7 +62,7 @@ class Attendance {
             schoolClass: studentClass,
             schoolSection: section,
             Attendance: attendance,
-          }
+          },
         );
 
         console.log("Attendance Inserted");
@@ -80,6 +71,64 @@ class Attendance {
       console.log("Attendance Error:", error);
     }
   }
+
+  async getAttendance(studentSession, date, studentClass, section) {
+    try {
+      return await this.tablesDB.listRows(
+        conf.database_Id,
+        "studentattendance",
+        [
+          Query.equal("Year", studentSession),
+          Query.equal("Date", date),
+          Query.equal("schoolClass", studentClass),
+          Query.equal("schoolSection", section),
+        ],
+      );
+    } catch (error) {
+      console.log("Error in getting attendance", error);
+    }
+  }
+
+ async getMonthlyAttendance(studentSession, studentClass, section, month) {
+  try {
+    // month format => "2026-05"
+
+    const [year, monthNumber] = month.split("-");
+
+    // START DATE
+    const startDate = `${year}-${monthNumber}-01`;
+
+    // LAST DAY OF MONTH
+    const lastDay = new Date(year, monthNumber, 0).getDate();
+
+    // END DATE
+    const endDate = `${year}-${monthNumber}-${String(lastDay).padStart(
+      2,
+      "0"
+    )}`;
+
+    console.log(startDate);
+    console.log(endDate);
+
+    return await this.tablesDB.listRows(
+      conf.database_Id,
+      "studentattendance",
+      [
+        Query.equal("Year", studentSession),
+
+        Query.equal("schoolClass", studentClass),
+
+        Query.equal("schoolSection", section),
+
+        Query.greaterThanEqual("Date", startDate),
+
+        Query.lessThanEqual("Date", endDate),
+      ],
+    );
+  } catch (error) {
+    console.log("Error in getting monthly attendance", error);
+  }
+}
 }
 
 const studentAttendance = new Attendance();
