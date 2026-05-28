@@ -9,7 +9,11 @@ export default function Protected({ children, authentication = true }) {
     (state) => state.user_authentication.loginStatus,
   );
   const userData = useSelector((state)=>state.user_authentication.userData)
+ 
+  const schoolData = useSelector((state)=>state.user_authentication.schoolData)
   console.log("Authstatus", authStatus);
+  console.log("schooldata on auth layout", schoolData);
+  
   console.log("User Data on auth",userData)
   useEffect(() => {
     if (authentication && !authStatus) {

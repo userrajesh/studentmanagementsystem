@@ -1,20 +1,82 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import userAuth from "../../appwrite/authConfig";
 import { Link, useNavigate } from "react-router-dom";
+import { Country, State, City } from "country-state-city";
+import { useForm, Controller } from "react-hook-form";
+
 import {
   CommonInput,
   CommonButton,
   CommonSelect,
 } from "../Components/Common/index";
-import { useForm } from "react-hook-form";
 
 function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
   const navigate = useNavigate();
 
-  const { register, handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    mode: "onChange", // validate while typing
+    defaultValues: {
+      country: "IN", // India selected by default
+    },
+  });
+  const selectedCountry = watch("country");
+  const password = watch("password");
+  const selectedState = watch("school_state");
+
+  // =========================
+  // LOAD COUNTRIES
+  // =========================
+  useEffect(() => {
+    const allCountries = Country.getAllCountries();
+    setCountries(allCountries);
+
+    // India selected by default
+    const indiaStates = State.getStatesOfCountry("IN");
+    setStates(indiaStates);
+  }, []);
+
+  // =========================
+  // LOAD STATES
+  // =========================
+  useEffect(() => {
+    if (selectedCountry) {
+      const stateList = State.getStatesOfCountry(selectedCountry);
+
+      setStates(stateList);
+
+      // Reset state + district
+      setValue("school_state", "");
+      setValue("school_district", "");
+      setDistricts([]);
+    }
+  }, [selectedCountry, setValue]);
+
+  // =========================
+  // LOAD DISTRICTS (Cities)
+  // =========================
+  useEffect(() => {
+    if (selectedCountry && selectedState) {
+      const districtList = City.getCitiesOfState(
+        selectedCountry,
+        selectedState,
+      );
+
+      setDistricts(districtList);
+      setValue("school_district", "");
+    }
+  }, [selectedCountry, selectedState, setValue]);
 
   // =========================
   // REGISTER USER
@@ -25,11 +87,10 @@ function Register() {
 
     try {
       const session = await userAuth.createUser(data);
+      console.log(data)
 
       if (session) {
-        setSuccess(
-          "Registration successful! Redirecting to login page..."
-        );
+        setSuccess("Registration successful! Redirecting to login page...");
 
         // Redirect after 3 seconds
         setTimeout(() => {
@@ -49,7 +110,7 @@ function Register() {
       </h5>
 
       <p className="text-gray-600 mt-2">
-        Start your website in seconds. Already have an account?
+        Register Your School Now . Already have an account?
         <Link
           to={"/login"}
           className="text-blue-600 hover:underline font-medium ml-1"
@@ -76,6 +137,18 @@ function Register() {
       <form onSubmit={handleSubmit(create)} className="mt-6">
         {/* Grid Inputs */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Full Name */}
+          <div>
+            <CommonInput
+              type="text"
+              label="Enter Your Name"
+              placeholder="e.g Rajesh Mandal"
+              {...register("name", {
+                required: "Name is required",
+              })}
+            />
+          </div>
+
           {/* Email */}
           <div>
             <CommonInput
@@ -92,31 +165,114 @@ function Register() {
               })}
             />
           </div>
-
-          {/* Full Name */}
+          {/* School Name */}
           <div>
             <CommonInput
               type="text"
-              label="Enter Your Name"
-              placeholder="e.g Rajesh Mandal"
-              {...register("name", {
-                required: "Name is required",
+              label="Enter School Name"
+              placeholder="e.g Madona Public School"
+              {...register("school_name", {
+                required: "School name is required",
               })}
             />
           </div>
-
+          {/* School Registration number */}
+          <div>
+            <CommonInput
+              type="text"
+              label="School Registration Number"
+              placeholder="e.g A07015429"
+              {...register("school_reg_number", {
+                required: "School registraion number is required",
+              })}
+            />
+          </div>
           {/* Country */}
           <div>
-            <CommonSelect
-              options={["India", "China", "Nepal"]}
-              label="Country"
-              className="mb-4"
-              {...register("country", {
-                required: true,
-              })}
+            <label className="block mb-2 font-medium">Country</label>
+
+            <Controller
+              name="school_country"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <select {...field} className="w-full border rounded-lg p-3">
+                  {countries.map((country) => (
+                    <option key={country.isoCode} value={country.isoCode}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            />
+          </div>
+          {/* State */}
+          <div>
+            <label className="block mb-2 font-medium">State</label>
+
+            <Controller
+              name="school_state"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <select {...field} className="w-full border rounded-lg p-3">
+                  <option value="">Select State</option>
+
+                  {states.map((state) => (
+                    <option key={state.isoCode} value={state.isoCode}>
+                      {state.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             />
           </div>
 
+          {/* SchoolCity */}
+          <div>
+            <label className="block mb-2 font-medium">School City</label>
+
+            <Controller
+              name="school_city"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <select {...field} className="w-full border rounded-lg p-3">
+                  <option value="">Select City</option>
+
+                  {districts.map((district, index) => (
+                    <option key={index} value={district.name}>
+                      {district.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            />
+          </div>
+
+          {/* Pincode */}
+          <div>
+            <CommonInput
+              type="text"
+              label="Pin Code"
+              placeholder="e.g 847121"
+              {...register("school_pincode", {
+                required: "School Pin Code is required",
+              })}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block mb-2 font-medium">Full Address</label>
+
+            <textarea
+              rows={4}
+              placeholder="Enter full school address"
+              className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
+              {...register("school_address", {
+                required: "School address is required",
+              })}
+            />
+          </div>
           {/* Password */}
           <div>
             <CommonInput
@@ -131,6 +287,26 @@ function Register() {
                 },
               })}
             />
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <CommonInput
+              type="password"
+              label="Confirm password"
+              placeholder="••••••••"
+              {...register("confirmPassword", {
+                required: "Confirm password is required",
+                validate: (value) =>
+                  value === password || "Passwords do not match",
+              })}
+            />
+
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.confirmPassword.message}
+              </p>
+            )}
           </div>
         </div>
 

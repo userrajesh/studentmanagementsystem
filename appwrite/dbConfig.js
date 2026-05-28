@@ -10,6 +10,36 @@ class DatabaseConfiguration {
     this.storage = new Storage(this.client);
   }
 
+  async addSchool({
+    school_name,
+    school_country,
+    school_state,
+    school_city,
+    school_pincode,
+    school_address,
+    school_reg_number,
+    user_id,
+  }) {
+    try {
+      return await this.tablesDB.createRow({
+        databaseId: conf.database_Id,
+        tableId: "school",
+        rowId: ID.unique(),
+        data: {
+          school_name,
+          school_country,
+          school_state,
+          school_city,
+          school_pincode,
+          school_address,
+          school_registrationno: school_reg_number,
+          user_id,
+        },
+      });
+    } catch (error) {
+      console.log("Error while addding school in addSchool::", error);
+    }
+  }
   async addUser({ userId, country }) {
     try {
       console.log(userId, country);
@@ -19,7 +49,7 @@ class DatabaseConfiguration {
         rowId: ID.unique(),
         data: {
           userId,
-          country, 
+          country,
         },
       });
     } catch (error) {
@@ -90,6 +120,21 @@ class DatabaseConfiguration {
     } catch (error) {
       console.log("error in getfilepreview", error);
       return false;
+    }
+  }
+
+  async getSchoolByUserId(userId) {
+    try {
+      const response = await this.tablesDB.listRows({
+        databaseId: conf.database_Id,
+        tableId: "school",
+        queries: [Query.equal("user_id", userId)],
+      });
+
+      return response.rows[0]; // return first matching school
+    } catch (error) {
+      console.log("Error getting school:", error);
+      return null;
     }
   }
 }

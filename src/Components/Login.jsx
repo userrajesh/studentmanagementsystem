@@ -4,7 +4,8 @@ import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { login as authLogin } from "../store/authSlice";
 import userAuth from "../../appwrite/authConfig";
-import {CommonButton,CommonInput} from "../Components/Common/index"
+import databseconfiguration from "../../appwrite/dbConfig";
+import { CommonButton, CommonInput } from "../Components/Common/index";
 function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -17,9 +18,21 @@ function Login() {
       const session = await userAuth.login(data);
       if (session) {
         const userData = await userAuth.getCurrentUser();
+        if (userData) {
+          const schoolData = await databseconfiguration.getSchoolByUserId(
+            userData.$id,
+          );
+          console.log(schoolData,"school Data on login")
+          dispatch(
+            authLogin({
+              userData,
+              schoolData,
+            }),
+          );
+          navigate("/dashboard");
+        }
 
-        if (userData) dispatch(authLogin(userData));
-        navigate("/dashboard");
+        // if (userData) dispatch(authLogin(userData));
       }
     } catch (error) {
       setError(error?.message || "some thing went wrong during login");
@@ -87,9 +100,7 @@ function Login() {
           </div>
 
           {/* <!-- Login Button --> */}
-          <CommonButton type="submit" text="Login to your account"/>
-         
-          
+          <CommonButton type="submit" text="Login to your account" />
 
           {/* <!-- Register --> */}
           <p className="text-sm text-gray-600 mt-4">

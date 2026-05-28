@@ -12,9 +12,20 @@ class AuthenticateUser {
     this.account = new Account(this.client);
   }
   //Create User
-  async createUser({ userId = ID.unique(), email, name, password, country }) {
+  async createUser({
+    userId = ID.unique(),
+    email,
+    name,
+    password,
+    school_name,
+    school_country,
+    school_state,
+    school_city,
+    school_pincode,
+    school_address,
+    school_reg_number,
+  }) {
     try {
-      country = country;
       const user = await this.account.create({
         userId: userId,
         email: email,
@@ -23,12 +34,20 @@ class AuthenticateUser {
       });
 
       if (user) {
-        await databseconfiguration.addUser({
-          userId: user.$id,
-          country,
+        await databseconfiguration.addSchool({
+          school_name,
+          school_country,
+          school_state,
+          school_city,
+          school_pincode,
+          school_address,
+          school_reg_number,
+          user_id: user.$id,
         });
-         
-        this.login(this.email,this.password);
+        await this.login({
+          email,
+          password,
+        });
         // agar user register ho gaya to usko login page pe le jaate hai
         return user;
       }
@@ -37,13 +56,10 @@ class AuthenticateUser {
     }
   }
 
-  async login( {email, password} ) {
+  async login({ email, password }) {
     try {
-      console.log("inside login", email,password)
-      return await this.account.createEmailPasswordSession(
-        email,
-        password
-      );
+      console.log("inside login", email, password);
+      return await this.account.createEmailPasswordSession(email, password);
     } catch (error) {
       console.log("Error inside Login ::", error);
     }
