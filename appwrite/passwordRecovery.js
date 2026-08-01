@@ -17,7 +17,7 @@ class ResetPasswordEmail {
     try {
       const response = await this.account.createRecovery(
         email,
-        "https://rajeshmandal.netlify.app/reset-password"
+        "https://rajeshmandal.netlify.app/ResetPassword"
       );
 
       console.log(response);
