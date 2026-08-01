@@ -1,21 +1,24 @@
 import React, { useEffect, useState } from "react";
-import student from "../../../appwrite/Student/StudentAdd";
+import addStudent from "../../../appwrite/Student/StudentAdd";
 import editStudent from "../../../appwrite/Student/editStudent";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { CommonSelect, CommonInput } from "../../Components/Common/index";
-
+import { useSelector } from "react-redux";
+useSelector;
 function AddStudent() {
   const { register, handleSubmit, setValue } = useForm();
   const { studentId } = useParams();
-
+  const schoolData = useSelector(
+    (state) => state.user_authentication.schoolData,
+  );
   const isEdit = !!studentId;
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [documents, setDocuments] = useState([{ name: "", file: null }]);
 
- const [student, setStudent] = useState(null);
+  const [student, setStudent] = useState(null);
   const [parent, setParent] = useState(null);
   const [admission, setAdmission] = useState(null);
   const [filedetails, setFileDetails] = useState(null);
@@ -31,20 +34,19 @@ function AddStudent() {
 
   const fetchStudent = async () => {
     try {
-      const [studentRes, parentRes, admissionRes, fileRes] =
-          await Promise.all([
-            editStudent.getSingleStudent(studentId),
-            editStudent.getParentDetails(studentId),
-            editStudent.getAdmissionDetails(studentId),
-            editStudent.getFileDetails(studentId),
-          ]);
-          console.log([studentRes, parentRes, admissionRes, fileRes])
-        setStudent(studentRes || null);
-        setParent(parentRes || null);
-        setAdmission(admissionRes || null);
-        setFileDetails(fileRes || null);
-     
-    //Manually set values 
+      const [studentRes, parentRes, admissionRes, fileRes] = await Promise.all([
+        editStudent.getSingleStudent(studentId),
+        editStudent.getParentDetails(studentId),
+        editStudent.getAdmissionDetails(studentId),
+        editStudent.getFileDetails(studentId),
+      ]);
+      console.log([studentRes, parentRes, admissionRes, fileRes]);
+      setStudent(studentRes || null);
+      setParent(parentRes || null);
+      setAdmission(admissionRes || null);
+      setFileDetails(fileRes || null);
+
+      //Manually set values
       setValue("admissionNumber", admissionRes.admissionNo);
       setValue("rollNo", admissionRes.rollNumber);
       setValue("admissionDate", admissionRes.admissionDate);
@@ -103,59 +105,80 @@ function AddStudent() {
   // =============================
   // SUBMIT (ADD + EDIT)
   // =============================
-  const handleStudent = async (data) => {
-    setError("");
-    setLoading(true);
+const handleStudent = async (data) => {
+  setError("");
+  setLoading(true);
 
-    try {
-      let imageId = studentData?.image;
+  try {
+    let imageId = student?.image || null;
+    let currentStudentId = studentId;
 
-      // Upload new image if selected
-      if (data.image && data.image[0]) {
-        const uploaded = await student.uploadFile(data.image[0]);
-        imageId = uploaded.$id;
-      }
+    // ==========================
+    // Upload image if selected
+    // ==========================
+    if (data.image?.[0]) {
+      const uploadedFile =
+        await addStudent.uploadFile(data.image[0]);
 
-      let studentId;
-
-      if (isEdit) {
-        await student.updateStudent(id, {
-          ...data,
-          image: imageId,
-        });
-        studentId = id;
-      } else {
-        const newStudent = await student.addStudentDetails({
-          ...data,
-          image: imageId,
-        });
-        studentId = newStudent.$id;
-      }
-
-      // Upload documents
-      await Promise.all(
-        documents.map(async (doc) => {
-          if (!doc.file) return;
-
-          const uploadedFile = await student.uploadFile(doc.file);
-
-          await student.addStudentDocument({
-            studentId,
-            name: doc.name,
-            fileId: uploadedFile.$id,
-          });
-        }),
-      );
-
-      alert(
-        isEdit ? "Student Updated Successfully" : "Student Added Successfully",
-      );
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
+      imageId = uploadedFile.$id;
     }
-  };
+
+    // ==========================
+    // UPDATE STUDENT
+    // ==========================
+    if (isEdit) {
+      await addStudent.updateStudent(studentId, {
+        ...data,
+        image: imageId,
+      });
+    }
+
+    // ==========================
+    // ADD NEW STUDENT
+    // ==========================
+    else {
+      const newStudent =
+        await addStudent.addStudentDetails({
+          ...data,
+          image: imageId,
+
+          // send only school id
+          schoolId: schoolData?.$id,
+        });
+
+      currentStudentId = newStudent.$id;
+    }
+
+    // ==========================
+    // Upload documents
+    // ==========================
+    await Promise.all(
+      documents.map(async (doc) => {
+        if (!doc.file) return;
+
+        const uploadedDocument =
+          await addStudent.uploadFile(doc.file);
+
+        await addStudent.addStudentDocument({
+          studentId: currentStudentId,
+          name: doc.name,
+          fileId: uploadedDocument.$id,
+        });
+      })
+    );
+
+    alert(
+      isEdit
+        ? "Student Updated Successfully"
+        : "Student Added Successfully"
+    );
+  } catch (error) {
+    console.error(error);
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-100 p-1 ">

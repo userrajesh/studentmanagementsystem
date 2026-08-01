@@ -4,6 +4,8 @@ import studentAttendence from "../../../appwrite/Student/attendance";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import MonthlyAttendanceModal from "./MonthlyAttendanceModal";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 function StudentAttendance() {
   const [showModal, setShowModal] = useState(false);
 
@@ -25,6 +27,10 @@ function StudentAttendance() {
   const [loading, setLoading] = useState(false);
 
   const [saving, setSaving] = useState(false);
+  //school id from store
+  const schoolData = useSelector(
+    (state) => state.user_authentication.schoolData,
+  );
 
   //Monthly report open
   const openMonthlyReport = async (student) => {
@@ -41,12 +47,11 @@ function StudentAttendance() {
       const rows = res.rows || [];
       const status = [];
       const attendanceObj = {};
- 
+
       rows.forEach((row) => {
         const attendance = JSON.parse(row.Attendance);
         console.log(attendance);
         const status = attendance[student.$id];
-      
 
         if (status) {
           attendanceObj[row.Date] = status;
@@ -94,15 +99,24 @@ function StudentAttendance() {
       setLoading(true);
 
       // FETCH ATTENDANCE
-      const attendanceRes = await studentAttendence.getAttendance(
+      if (!studentClass || !section || !studentSession || !date) {
+        alert("Please select all filters");
+        return;
+      }
+      const attendanceRes = await studentAttendence.getAttendance({
         studentSession,
         date,
         studentClass,
         section,
-      );
+        schoolId: schoolData?.$id,
+      });
 
       // FETCH STUDENTS
-      const res = await editStudent.getStudentByClass(studentClass, section);
+      const res = await editStudent.getStudentByClass({
+        studentClass,
+        section,
+        schoolId: schoolData?.$id,
+      });
 
       const rows = res?.rows || [];
 
@@ -156,14 +170,15 @@ function StudentAttendance() {
       setSaving(true);
 
       const attendanceData = JSON.stringify(attendance);
-
-      await studentAttendence.mark_attandance(
+      const schoolId = schoolData.$id;
+      await studentAttendence.mark_attandance({
+        schoolId,
         studentSession,
         date,
         studentClass,
         section,
-        attendanceData,
-      );
+        attendance: attendanceData,
+      });
 
       alert("Attendance Saved Successfully");
     } catch (error) {

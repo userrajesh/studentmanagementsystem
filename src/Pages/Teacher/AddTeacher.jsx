@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useParams } from "react-router-dom";
 
 function AddTeacher() {
   const { register, handleSubmit, reset } = useForm();
-
+  const { teacherId } = useParams();
   const [profileImage, setProfileImage] = useState(null);
   const [documents, setDocuments] = useState([{ name: "", file: null }]);
 
@@ -21,7 +22,7 @@ function AddTeacher() {
     const updatedDocs = documents.filter((_, i) => i !== index);
     setDocuments(updatedDocs);
   };
-
+  const isEdit = false; //!!teacherId;
   const onSubmit = async (data) => {
     try {
       const teacherData = {
@@ -49,11 +50,10 @@ function AddTeacher() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
+      <h2 className="text-2xl bg-gray-800 text-white p-2 mb-4">
+        {isEdit ? "Edit Teacher" : "Add New Teacher"}
+      </h2>
       <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold mb-8 text-gray-800">
-          Add Teacher
-        </h1>
-
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* ================= BASIC DETAILS ================= */}
 
@@ -100,17 +100,15 @@ function AddTeacher() {
 
             <div>
               <label className="block mb-2 font-medium">Date of Birth</label>
-              <input
-                type="date"
+              {/* <DatePicker
+                label="select date"
                 {...register("dob")}
                 className="w-full border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              /> */}
             </div>
 
             <div>
-              <label className="block mb-2 font-medium">
-                Joining Date
-              </label>
+              <label className="block mb-2 font-medium">Joining Date</label>
               <input
                 type="date"
                 {...register("joiningDate")}
@@ -119,9 +117,7 @@ function AddTeacher() {
             </div>
 
             <div>
-              <label className="block mb-2 font-medium">
-                Qualification
-              </label>
+              <label className="block mb-2 font-medium">Qualification</label>
               <input
                 type="text"
                 {...register("qualification")}
@@ -159,9 +155,7 @@ function AddTeacher() {
             </div>
 
             <div>
-              <label className="block mb-2 font-medium">
-                Assigned Class
-              </label>
+              <label className="block mb-2 font-medium">Assigned Class</label>
               <input
                 type="text"
                 placeholder="10-A"
@@ -194,9 +188,7 @@ function AddTeacher() {
           {/* ================= PROFILE IMAGE ================= */}
 
           <div className="mt-8 border-t pt-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Upload Profile Image
-            </h2>
+            <h2 className="text-xl font-semibold mb-4">Upload Profile Image</h2>
 
             <input
               type="file"
@@ -210,9 +202,7 @@ function AddTeacher() {
 
           <div className="mt-8 border-t pt-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">
-                Upload Documents
-              </h2>
+              <h2 className="text-xl font-semibold">Upload Documents</h2>
 
               <button
                 type="button"
@@ -237,29 +227,19 @@ function AddTeacher() {
                     type="text"
                     value={doc.name}
                     onChange={(e) =>
-                      handleDocumentChange(
-                        index,
-                        "name",
-                        e.target.value
-                      )
+                      handleDocumentChange(index, "name", e.target.value)
                     }
                     className="w-full border rounded-lg px-4 py-2"
                   />
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-medium">
-                    Upload File
-                  </label>
+                  <label className="block mb-2 font-medium">Upload File</label>
 
                   <input
                     type="file"
                     onChange={(e) =>
-                      handleDocumentChange(
-                        index,
-                        "file",
-                        e.target.files[0]
-                      )
+                      handleDocumentChange(index, "file", e.target.files[0])
                     }
                     className="w-full border rounded-lg px-4 py-2"
                   />

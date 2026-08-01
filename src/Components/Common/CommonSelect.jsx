@@ -1,14 +1,17 @@
 import React, { useId } from "react";
 
-function CommonSelect({ options, className = "", label, ...props }, ref) {
+function CommonSelect(
+  { options = [], className = "", label = "", ...props },
+  ref
+) {
   const id = useId();
-  //  console.log("common select", "Options",options,"Label",label)
+
   return (
-    <div className="mb-4">
+    <div className="w-full mb-4">
       {label && (
         <label
           htmlFor={id}
-          className="block mb-2 text-sm font-medium text-gray-700"
+          className="block mb-2 text-sm sm:text-base font-medium text-gray-700"
         >
           {label}
         </label>
@@ -18,16 +21,33 @@ function CommonSelect({ options, className = "", label, ...props }, ref) {
         id={id}
         ref={ref}
         {...props}
-        className={`px-3 py-2 bg-white text-black outline-none focus:bg-gray-50 duration-200 border border-gray-200 w-full ${className}`}
+        className={`
+          w-full
+          px-3 sm:px-4
+          py-2.5 sm:py-3
+          min-h-[44px] sm:min-h-[48px]
+          text-sm sm:text-base
+          text-black
+          bg-gray-50
+          border border-gray-300
+          rounded-lg
+          outline-none
+          transition-all duration-200
+          focus:ring-2
+          focus:ring-blue-500
+          focus:border-blue-500
+          cursor-pointer
+          ${className}
+        `}
       >
-        {options?.map((option) => {
-          //agar option me value aayega tabhi map karega nahi to nahi karega
-          return (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          );
-        })}
+        {options?.map((option) => (
+          <option
+            key={typeof option === "object" ? option.value : option}
+            value={typeof option === "object" ? option.value : option}
+          >
+            {typeof option === "object" ? option.label : option}
+          </option>
+        ))}
       </select>
     </div>
   );

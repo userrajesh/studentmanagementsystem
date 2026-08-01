@@ -22,13 +22,20 @@ function Login() {
           const schoolData = await databseconfiguration.getSchoolByUserId(
             userData.$id,
           );
-          console.log(schoolData,"school Data on login")
+
+          // Convert to serializable object
+          const plainUserData = JSON.parse(JSON.stringify(userData));
+
+          const plainSchoolData = JSON.parse(JSON.stringify(schoolData));
+
           dispatch(
             authLogin({
-              userData,
-              schoolData,
+              userData: plainUserData,
+              schoolData: plainSchoolData,
             }),
           );
+          console.log(schoolData, "school Data on login");
+
           navigate("/dashboard");
         }
 
@@ -40,45 +47,49 @@ function Login() {
   };
   return (
     <>
-      <div className="w-full max-w-sm bg-white p-6 border border-gray-200 rounded-lg shadow-sm">
-        <form onSubmit={handleSubmit(login)}>
-          <h5 className="text-xl font-semibold text-gray-900 mb-6">
-            Sign in to our platform
-          </h5>
-
-          {/* <!-- Email --> */}
-          <div className="mb-4">
-            <CommonInput
-              type="email"
-              required={true}
-              placeholder="example@company.com"
-              label="Your email"
-              {...register("email", {
-                required: true,
-                validate: {
-                  matchPattern: (value) =>
-                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ||
-                    "Email address must be a valid address",
-                },
-              })}
-            />
+      <div className="w-full max-w-md mx-auto bg-white p-5 sm:p-6 md:p-8 rounded-2xl shadow-lg border border-gray-100">
+        <form onSubmit={handleSubmit(login)} className="space-y-5">
+          <div className="text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Welcome Back
+            </h2>
+            <p className="mt-2 text-sm sm:text-base text-gray-500">
+              Sign in to your School Management System
+            </p>
           </div>
 
-          {/* <!-- Password --> */}
-          <div>
-            <CommonInput
-              type="password"
-              required={true}
-              placeholder="••••••••"
-              label="Your Password"
-              {...register("password", {
-                required: "password is required",
-              })}
-            />
-          </div>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-lg">
+              {error}
+            </div>
+          )}
 
-          {/* <!-- Remember + Forgot --> */}
-          <div className="flex items-center mt-6 mb-6">
+          <CommonInput
+            type="email"
+            required={true}
+            placeholder="example@company.com"
+            label="Email Address"
+            {...register("email", {
+              required: true,
+              validate: {
+                matchPattern: (value) =>
+                  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ||
+                  "Email address must be valid",
+              },
+            })}
+          />
+
+          <CommonInput
+            type="password"
+            required={true}
+            placeholder="••••••••"
+            label="Password"
+            {...register("password", {
+              required: "Password is required",
+            })}
+          />
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center">
               <input
                 id="remember"
@@ -91,27 +102,29 @@ function Login() {
               </label>
             </div>
 
-            <a
-              href="#"
-              className="ml-auto text-sm text-blue-600 hover:underline"
+            <Link
+              to="/verify-email"
+              className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
             >
-              Lost password?
-            </a>
+              Forgot Password?
+            </Link>
           </div>
 
-          {/* <!-- Login Button --> */}
-          <CommonButton type="submit" text="Login to your account" />
+          <CommonButton
+            type="submit"
+            text="Login to your account"
+            className="w-full"
+          />
 
-          {/* <!-- Register --> */}
-          <p className="text-sm text-gray-600 mt-4">
-            Not registered?
+          <div className="text-center text-sm text-gray-600">
+            Not registered?{" "}
             <Link
-              to={"/registeruser"}
-              className="text-blue-600 hover:underline"
+              to="/registeruser"
+              className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
             >
               Create Account
             </Link>
-          </p>
+          </div>
         </form>
       </div>
     </>

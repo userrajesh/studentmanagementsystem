@@ -6,8 +6,12 @@ import {
 import React, { useEffect, useState } from "react";
 import editStudent from "../../../appwrite/Student/editStudent";
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function ViewStudent() {
+  const schoolData = useSelector(
+    (state) => state.user_authentication.schoolData,
+  );
   const navigate = useNavigate();
   const [studentData, setStudentData] = useState([]);
   const [page, setPage] = useState(1);
@@ -33,6 +37,7 @@ function ViewStudent() {
         search,
         classFilter,
         sectionFilter,
+        schoolId: schoolData.$id,
       });
 
       setStudentData(res.rows);

@@ -14,19 +14,21 @@ class Attendance {
     this.storage = new Storage(this.client);
   }
 
-  async mark_attandance(
+  async mark_attandance({
     studentSession,
     date,
     studentClass,
     section,
     attendance,
-  ) {
+    schoolId,
+  }) {
     try {
       // CHECK IF RECORD ALREADY EXISTS
       const existingAttendance = await this.tablesDB.listRows(
         conf.database_Id,
         "studentattendance",
         [
+          Query.equal("schoolId", schoolId),
           Query.equal("Year", studentSession),
           Query.equal("Date", date),
           Query.equal("schoolClass", studentClass),
@@ -57,6 +59,7 @@ class Attendance {
           "studentattendance",
           ID.unique(),
           {
+            schoolId: schoolId,
             Year: studentSession,
             Date: date,
             schoolClass: studentClass,
@@ -72,12 +75,14 @@ class Attendance {
     }
   }
 
-  async getAttendance(studentSession, date, studentClass, section) {
+  async getAttendance({ studentSession, date, studentClass, section,schoolId }) {
     try {
+      console.log("bhosdi ke ===", studentSession, date, studentClass, section,schoolId);
       return await this.tablesDB.listRows(
         conf.database_Id,
         "studentattendance",
         [
+          Query.equal("schoolId", schoolId),
           Query.equal("Year", studentSession),
           Query.equal("Date", date),
           Query.equal("schoolClass", studentClass),
@@ -89,46 +94,43 @@ class Attendance {
     }
   }
 
- async getMonthlyAttendance(studentSession, studentClass, section, month) {
-  try {
-    // month format => "2026-05"
+  async getMonthlyAttendance(studentSession, studentClass, section, month) {
+    try {
+      // month format => "2026-05"
 
-    const [year, monthNumber] = month.split("-");
+      const [year, monthNumber] = month.split("-");
 
-    // START DATE
-    const startDate = `${year}-${monthNumber}-01`;
+      // START DATE
+      const startDate = `${year}-${monthNumber}-01`;
 
-    // LAST DAY OF MONTH
-    const lastDay = new Date(year, monthNumber, 0).getDate();
+      // LAST DAY OF MONTH
+      const lastDay = new Date(year, monthNumber, 0).getDate();
 
-    // END DATE
-    const endDate = `${year}-${monthNumber}-${String(lastDay).padStart(
-      2,
-      "0"
-    )}`;
+      // END DATE
+      const endDate = `${year}-${monthNumber}-${String(lastDay).padStart(
+        2,
+        "0",
+      )}`;
 
-    console.log(startDate);
-    console.log(endDate);
+      return await this.tablesDB.listRows(
+        conf.database_Id,
+        "studentattendance",
+        [
+          Query.equal("Year", studentSession),
 
-    return await this.tablesDB.listRows(
-      conf.database_Id,
-      "studentattendance",
-      [
-        Query.equal("Year", studentSession),
+          Query.equal("schoolClass", studentClass),
 
-        Query.equal("schoolClass", studentClass),
+          Query.equal("schoolSection", section),
 
-        Query.equal("schoolSection", section),
+          Query.greaterThanEqual("Date", startDate),
 
-        Query.greaterThanEqual("Date", startDate),
-
-        Query.lessThanEqual("Date", endDate),
-      ],
-    );
-  } catch (error) {
-    console.log("Error in getting monthly attendance", error);
+          Query.lessThanEqual("Date", endDate),
+        ],
+      );
+    } catch (error) {
+      console.log("Error in getting monthly attendance", error);
+    }
   }
-}
 }
 
 const studentAttendance = new Attendance();

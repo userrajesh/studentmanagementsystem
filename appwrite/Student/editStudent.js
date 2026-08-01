@@ -20,9 +20,15 @@ class EditStudent {
     search,
     classFilter,
     sectionFilter,
+    schoolId,
   } = {}) {
     try {
       const queries = [];
+
+      // Filter by schoolId
+      if (schoolId) {
+        queries.push(Query.equal("schoolId", [schoolId]));
+      }
 
       const safeLimit = Number(limit);
       const safeOffset = Number(offset);
@@ -34,17 +40,46 @@ class EditStudent {
       queries.push(Query.limit(safeLimit));
       queries.push(Query.offset(safeOffset));
 
-      if (search && search.trim() !== "") {
+      // Search student name
+      if (search?.trim()) {
         queries.push(Query.search("fullName", search.trim()));
       }
 
+      // Class filter
       if (classFilter) {
         queries.push(Query.equal("Class", [classFilter]));
       }
 
+      // Section filter
       if (sectionFilter) {
         queries.push(Query.equal("section", [sectionFilter]));
       }
+
+      const response = await this.tablesDB.listRows({
+        databaseId: conf.database_Id,
+        tableId: "student",
+        queries,
+      });
+
+      return response;
+    } catch (error) {
+      console.log("Error in getAllStudent", error);
+      return null;
+    }
+  }
+  async getStudentByClass({studentClass, section, schoolId}) {
+    
+    try {
+      // stop if any value is missing
+      if (!studentClass || !section) {
+        throw new Error("Class and Section are required");
+      }
+
+      const queries = [
+        Query.equal("schoolId", [schoolId]),
+        Query.equal("Class", [studentClass]),
+        Query.equal("section", [section]),
+      ];
 
       return await this.tablesDB.listRows({
         databaseId: conf.database_Id,
@@ -52,31 +87,9 @@ class EditStudent {
         queries,
       });
     } catch (error) {
-      console.log("Error in getAllStudent", error);
-      return null;
+      console.log("Error in getStudentByClass::", error);
     }
   }
- async getStudentByClass(studentClass, section) {
-  try {
-    // stop if any value is missing
-    if (!studentClass || !section) {
-      throw new Error("Class and Section are required");
-    }
-
-    const queries = [
-      Query.equal("Class", [studentClass]),
-      Query.equal("section", [section]),
-    ];
-
-    return await this.tablesDB.listRows({
-      databaseId: conf.database_Id,
-      tableId: "student",
-      queries,
-    });
-  } catch (error) {
-    console.log("Error in getStudentByClass::", error);
-  }
-}
 
   async getSingleStudent(id) {
     try {

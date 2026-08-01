@@ -18,6 +18,8 @@ import ViewStudent from "./Pages/Student/ViewStudent.jsx";
 import StudentAttendance from "./Pages/Student/StudentAttendance.jsx";
 import ViewTeacher from "./Pages/Teacher/ViewTeacher.jsx";
 import AddTeacher from "./Pages/Teacher/AddTeacher.jsx";
+import ResetPassword from "./Components/ResetPassword.jsx";
+import VerifyEmail from "./Components/VerifyEmail.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -103,7 +105,7 @@ const router = createBrowserRouter([
         path: "/login",
         element: (
           <AuthLayout authentication={false}>
-            <Login />
+            <Home />
           </AuthLayout>
         ),
       },
@@ -113,6 +115,22 @@ const router = createBrowserRouter([
         element: (
           <AuthLayout authentication={false}>
             <Register />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/verify-email",
+        element: (
+          <AuthLayout authentication={false}>
+            <VerifyEmail />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/reset-password",
+        element: (
+          <AuthLayout authentication={false}>
+            <ResetPassword />
           </AuthLayout>
         ),
       },

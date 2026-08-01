@@ -35,6 +35,7 @@ function Header() {
  const schoolData = useSelector(
   (state) => state.user_authentication.schoolData
 );
+  console.log(schoolData)
   const navItems = [
     {
       name: "All Posts",
@@ -56,8 +57,9 @@ function Header() {
     },
   ];
 
-  return (
-    <Disclosure as="nav" className="bg-gray-800 shadow-md">
+  return (  
+    <div >
+  <Disclosure as="nav" className="bg-gray-800 shadow-md">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           {/* Mobile Menu Button */}
@@ -183,6 +185,8 @@ function Header() {
         </div>
       </DisclosurePanel>
     </Disclosure>
+    </div>
+  
   );
 }
 

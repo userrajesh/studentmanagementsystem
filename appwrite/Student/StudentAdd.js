@@ -1,6 +1,6 @@
 import { Client, Account, ID, TablesDB, Storage } from "appwrite";
 import conf from "../../conf/conf";
-class Student {
+class AddStudent {
   client = new Client();
   account;
   storage;
@@ -12,6 +12,7 @@ class Student {
     this.storage = new Storage(this.client);
   }
   async addStudentDetails(data) {
+    console.log(data, "data on student Add");
     try {
       const admission = await this.tablesDB.createRow({
         databaseId: conf.database_Id,
@@ -42,6 +43,8 @@ class Student {
           address: data.address,
           studentPhone: data.studentPhone,
           studentEmail: data.studentEmail,
+          nationalIdNumber:data.idNumber,
+          section:data.section,
           bloodGroup: data.bloodGroup,
           studentPhoto: data.image,
           religion: data.religion,
@@ -49,6 +52,7 @@ class Student {
           studentWeight: data.studentWeight,
           studentMedicalHistory: data.medicalHistory,
           admissionId: admissionId,
+          schoolId: data.schoolId,
         },
       });
 
@@ -110,5 +114,5 @@ class Student {
     }
   }
 }
-const student = new Student();
-export default student;
+const addStudent = new AddStudent();
+export default addStudent;
