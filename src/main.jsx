@@ -127,7 +127,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "https://rajeshmandal.netlify.app/reset-password",
+        path: "/reset-password",
         element: (
           <AuthLayout authentication={false}>
             <ResetPassword />
